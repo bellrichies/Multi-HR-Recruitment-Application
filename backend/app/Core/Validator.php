@@ -48,6 +48,7 @@ class Validator
             'string' => $this->string($field, $value),
             'integer' => $this->integer($field, $value),
             'numeric' => $this->numeric($field, $value),
+            'date' => $this->date($field, $value),
             'min' => $this->min($field, $value, (int) $parameter),
             'max' => $this->max($field, $value, (int) $parameter),
             'in' => $this->in($field, $value, $parameter),
@@ -88,6 +89,17 @@ class Validator
     {
         if ($value !== null && $value !== '' && ! is_numeric($value)) {
             $this->addError($field, ucfirst(str_replace('_', ' ', $field)) . ' must be numeric.');
+        }
+    }
+
+    private function date(string $field, mixed $value): void
+    {
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        if (! is_string($value) || strtotime($value) === false) {
+            $this->addError($field, ucfirst(str_replace('_', ' ', $field)) . ' must be a valid date.');
         }
     }
 

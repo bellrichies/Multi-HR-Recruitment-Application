@@ -52,6 +52,27 @@ return function (PDO $db): void {
         $assignPermission->execute(['role_id' => $superAdminRoleId, 'permission_id' => (int) $permissionId]);
     }
 
+    $defaultRolePermissions = [
+        'recruiter' => ['recruiters.update'],
+        'job_seeker' => ['job_seekers.update'],
+        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr'],
+        'relationship_officer' => ['relationship_officers.update', 'recruiters.view'],
+    ];
+    $roleLookup = $db->query('SELECT slug, id FROM roles')->fetchAll(PDO::FETCH_KEY_PAIR);
+    $permissionLookup = $db->query('SELECT slug, id FROM permissions')->fetchAll(PDO::FETCH_KEY_PAIR);
+
+    foreach ($defaultRolePermissions as $roleSlug => $permissionSlugs) {
+        $roleId = (int) ($roleLookup[$roleSlug] ?? 0);
+
+        foreach ($permissionSlugs as $permissionSlug) {
+            $permissionId = (int) ($permissionLookup[$permissionSlug] ?? 0);
+
+            if ($roleId > 0 && $permissionId > 0) {
+                $assignPermission->execute(['role_id' => $roleId, 'permission_id' => $permissionId]);
+            }
+        }
+    }
+
     $email = (string) env('SUPER_ADMIN_EMAIL', 'admin@example.com');
     $existing = $db->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
     $existing->execute(['email' => strtolower($email)]);

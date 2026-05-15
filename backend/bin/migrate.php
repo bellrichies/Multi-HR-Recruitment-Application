@@ -39,8 +39,6 @@ foreach ($migrationFiles as $file) {
         throw new RuntimeException("Migration {$migration} must return an array of SQL statements.");
     }
 
-    $db->beginTransaction();
-
     try {
         foreach ($statements as $statement) {
             $db->exec($statement);
@@ -48,10 +46,12 @@ foreach ($migrationFiles as $file) {
 
         $record = $db->prepare('INSERT INTO migrations (migration, executed_at) VALUES (:migration, NOW())');
         $record->execute(['migration' => $migration]);
-        $db->commit();
         echo "Migrated {$migration}" . PHP_EOL;
     } catch (Throwable $exception) {
-        $db->rollBack();
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+
         throw $exception;
     }
 }
