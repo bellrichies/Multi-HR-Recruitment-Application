@@ -6,15 +6,22 @@ namespace App\Middleware;
 
 use App\Core\HttpException;
 use App\Core\Request;
+use App\Modules\Auth\Services\AuthService;
 
 class AuthMiddleware
 {
+    public function __construct(private readonly AuthService $auth)
+    {
+    }
+
     public function handle(Request $request, ?string $parameter = null): void
     {
-        if ($request->bearerToken() === null) {
+        $token = $request->bearerToken();
+
+        if ($token === null) {
             throw new HttpException('Authentication token is required.', 401);
         }
 
-        // JWT validation is implemented in Phase 2 with the Auth module.
+        $request->setAttribute('user', $this->auth->userFromToken($token));
     }
 }

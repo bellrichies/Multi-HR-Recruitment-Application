@@ -19,6 +19,7 @@ return [
         'roles.create',
         'roles.update',
         'roles.delete',
+        'roles.assign',
         'permissions.view',
         'permissions.assign',
         'jobs.view',

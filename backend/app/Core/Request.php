@@ -7,6 +7,7 @@ namespace App\Core;
 class Request
 {
     private ?array $json = null;
+    private array $attributes = [];
 
     public function method(): string
     {
@@ -80,6 +81,23 @@ class Request
     public function userAgent(): string
     {
         return (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+    }
+
+    public function setAttribute(string $key, mixed $value): void
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    public function attribute(string $key, mixed $default = null): mixed
+    {
+        return $this->attributes[$key] ?? $default;
+    }
+
+    public function user(): ?array
+    {
+        $user = $this->attribute('user');
+
+        return is_array($user) ? $user : null;
     }
 
     private function json(): array

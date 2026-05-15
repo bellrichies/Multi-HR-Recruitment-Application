@@ -68,13 +68,13 @@ class Container
         foreach ($constructor->getParameters() as $parameter) {
             $type = $parameter->getType();
 
-            if ($type instanceof ReflectionNamedType && ! $type->isBuiltin()) {
-                $dependencies[] = $this->get($type->getName());
+            if ($parameter->isDefaultValueAvailable()) {
+                $dependencies[] = $parameter->getDefaultValue();
                 continue;
             }
 
-            if ($parameter->isDefaultValueAvailable()) {
-                $dependencies[] = $parameter->getDefaultValue();
+            if ($type instanceof ReflectionNamedType && ! $type->isBuiltin()) {
+                $dependencies[] = $this->get($type->getName());
                 continue;
             }
 

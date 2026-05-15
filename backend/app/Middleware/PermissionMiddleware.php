@@ -15,6 +15,20 @@ class PermissionMiddleware
             throw new HttpException('Permission middleware requires a permission name.', 500);
         }
 
-        // Permission lookup is implemented in Phase 2 with RBAC tables and services.
+        $user = $request->user();
+
+        if ($user === null) {
+            throw new HttpException('Authentication is required before permission checks.', 401);
+        }
+
+        $roles = array_column($user['roles'] ?? [], 'slug');
+
+        if (in_array('super_admin', $roles, true)) {
+            return;
+        }
+
+        if (! in_array($parameter, $user['permissions'] ?? [], true)) {
+            throw new HttpException('You do not have permission to perform this action.', 403);
+        }
     }
 }

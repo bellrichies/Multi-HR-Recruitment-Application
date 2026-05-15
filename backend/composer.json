@@ -24,6 +24,8 @@
     },
     "scripts": {
         "lint": "find app public routes tests -name '*.php' -print0 | xargs -0 -n1 php -l",
+        "migrate": "php bin/migrate.php",
+        "seed": "php bin/seed.php",
         "test": "phpunit"
     },
     "config": {
