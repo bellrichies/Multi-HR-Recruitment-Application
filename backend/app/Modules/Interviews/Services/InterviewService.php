@@ -14,6 +14,7 @@ use App\Modules\Interviews\Repositories\InterviewFeedbackRepository;
 use App\Modules\Interviews\Repositories\InterviewRepository;
 use App\Modules\JobSeekers\Repositories\JobSeekerProfileRepository;
 use App\Modules\Jobs\Repositories\JobRepository;
+use App\Modules\Notifications\Services\NotificationService;
 use App\Modules\Recruiters\Repositories\RecruiterProfileRepository;
 
 class InterviewService
@@ -26,7 +27,8 @@ class InterviewService
         private readonly JobRepository $jobs,
         private readonly RecruiterProfileRepository $recruiters,
         private readonly JobSeekerProfileRepository $profiles,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly NotificationService $notifications
     ) {
     }
 
@@ -69,6 +71,7 @@ class InterviewService
                 'scheduled_by' => (int) $user['id'],
             ]);
             $this->advanceApplication($application, 'interview_scheduled', (int) $user['id'], 'Interview scheduled.');
+            $this->notifyInterviewParticipants($interview, 'Interview scheduled', 'An interview has been scheduled.', 'interview_scheduled');
             $this->auditRecord($context, 'interviews.schedule', (int) $interview['id'], null, $interview + ['notification_event' => 'interview_scheduled']);
 
             return ['interview' => $interview, 'feedback' => []];
@@ -91,6 +94,7 @@ class InterviewService
 
         return Database::transaction(function () use ($id, $data, $context, $old): array {
             $interview = $this->interviews->reschedule($id, $data);
+            $this->notifyInterviewParticipants($interview, 'Interview rescheduled', 'An interview has been rescheduled.', 'interview_scheduled');
             $this->auditRecord($context, 'interviews.reschedule', $id, $old, $interview + ['notification_event' => 'interview_rescheduled']);
 
             return ['interview' => $interview, 'feedback' => $this->feedback->forInterview($id)];
@@ -104,6 +108,7 @@ class InterviewService
 
         return Database::transaction(function () use ($id, $context, $old): array {
             $interview = $this->interviews->updateStatus($id, 'cancelled');
+            $this->notifyInterviewParticipants($interview, 'Interview cancelled', 'An interview has been cancelled.', 'interview_scheduled');
             $this->auditRecord($context, 'interviews.cancel', $id, $old, $interview + ['notification_event' => 'interview_cancelled']);
 
             return ['interview' => $interview, 'feedback' => $this->feedback->forInterview($id)];
@@ -252,5 +257,28 @@ class InterviewService
             'ip_address' => $context['ip_address'] ?? null,
             'user_agent' => $context['user_agent'] ?? null,
         ]);
+    }
+
+    private function notifyInterviewParticipants(array $interview, string $title, string $body, string $type): void
+    {
+        $profile = $this->profiles->findById((int) $interview['job_seeker_id']);
+        $recruiter = $this->recruiters->findById((int) $interview['recruiter_id']);
+        $recipients = [];
+
+        if ($profile !== null) {
+            $recipients[] = (int) $profile['user_id'];
+        }
+
+        if ($recruiter !== null) {
+            $recipients[] = (int) $recruiter['user_id'];
+        }
+
+        foreach (array_unique($recipients) as $userId) {
+            $this->notifications->notify($userId, $title, $body, $type, [
+                'interview_id' => (int) $interview['id'],
+                'application_id' => (int) $interview['application_id'],
+                'job_id' => (int) $interview['job_id'],
+            ]);
+        }
     }
 }

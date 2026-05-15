@@ -16,6 +16,7 @@ use App\Modules\Assessments\Repositories\AssessmentRepository;
 use App\Modules\Assessments\Repositories\AssessmentResultRepository;
 use App\Modules\Audit\Services\AuditLogService;
 use App\Modules\JobSeekers\Repositories\JobSeekerProfileRepository;
+use App\Modules\Notifications\Services\NotificationService;
 use App\Modules\Recruiters\Repositories\RecruiterProfileRepository;
 
 class AssessmentService
@@ -30,7 +31,8 @@ class AssessmentService
         private readonly ApplicationRepository $applications,
         private readonly ApplicationStageLogRepository $stageLogs,
         private readonly RecruiterProfileRepository $recruiters,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly NotificationService $notifications
     ) {
     }
 
@@ -133,6 +135,16 @@ class AssessmentService
 
             if ($application !== null) {
                 $this->advanceApplication($application, 'assessment_invited', (int) $user['id'], 'Assessment assigned.');
+            }
+
+            $profile = $this->profiles->findById((int) $assignment['job_seeker_id']);
+
+            if ($profile !== null) {
+                $this->notifications->notify((int) $profile['user_id'], 'Assessment assigned', 'You have been assigned an assessment.', 'assessment_assigned', [
+                    'assignment_id' => (int) $assignment['id'],
+                    'assessment_id' => (int) $assignment['assessment_id'],
+                    'job_id' => $assignment['job_id'] === null ? null : (int) $assignment['job_id'],
+                ]);
             }
 
             $this->auditRecord($context, 'assessments.assign', 'assessment_assignment', (int) $assignment['id'], null, $assignment);

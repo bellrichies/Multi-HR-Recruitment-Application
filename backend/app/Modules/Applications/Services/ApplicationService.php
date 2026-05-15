@@ -12,6 +12,7 @@ use App\Modules\Audit\Services\AuditLogService;
 use App\Modules\JobSeekers\Repositories\JobSeekerProfileRepository;
 use App\Modules\Jobs\Repositories\JobRepository;
 use App\Modules\Matching\Services\CandidateMatchingService;
+use App\Modules\Notifications\Services\NotificationService;
 use App\Modules\Recruiters\Repositories\RecruiterProfileRepository;
 
 class ApplicationService
@@ -55,7 +56,8 @@ class ApplicationService
         private readonly JobSeekerProfileRepository $profiles,
         private readonly RecruiterProfileRepository $recruiters,
         private readonly CandidateMatchingService $matching,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly NotificationService $notifications
     ) {
     }
 
@@ -103,6 +105,7 @@ class ApplicationService
                 'match_score' => $score,
             ]);
             $this->logs->create((int) $application['id'], null, 'applied', (int) $user['id'], 'Application submitted.');
+            $this->notifyApplicationStakeholders($application, $job, 'application_submitted', 'Application submitted', 'A candidate submitted a job application.');
             $this->auditApplication($context, 'applications.create', null, $application);
 
             return $this->withLogs($application);
@@ -139,6 +142,18 @@ class ApplicationService
         return Database::transaction(function () use ($id, $stage, $status, $note, $user, $context, $old): array {
             $application = $this->applications->updateStage($id, $stage, $status);
             $this->logs->create($id, $old['current_stage'], $stage, (int) $user['id'], $note);
+
+            if ($stage === 'shortlisted') {
+                $profile = $this->profiles->findById((int) $application['job_seeker_id']);
+
+                if ($profile !== null) {
+                    $this->notifications->notify((int) $profile['user_id'], 'Candidate shortlisted', 'Your application has been shortlisted.', 'candidate_shortlisted', [
+                        'application_id' => (int) $application['id'],
+                        'job_id' => (int) $application['job_id'],
+                    ]);
+                }
+            }
+
             $this->auditApplication($context, 'applications.move_stage', $old, $application);
 
             return $this->withLogs($application);
@@ -246,5 +261,27 @@ class ApplicationService
             'ip_address' => $context['ip_address'] ?? null,
             'user_agent' => $context['user_agent'] ?? null,
         ]);
+    }
+
+    private function notifyApplicationStakeholders(array $application, array $job, string $type, string $title, string $body): void
+    {
+        $recipients = [];
+
+        if (! empty($job['assigned_hr_officer_id'])) {
+            $recipients[] = (int) $job['assigned_hr_officer_id'];
+        }
+
+        $recruiter = $this->recruiters->findById((int) $job['recruiter_id']);
+
+        if ($recruiter !== null) {
+            $recipients[] = (int) $recruiter['user_id'];
+        }
+
+        foreach (array_unique($recipients) as $userId) {
+            $this->notifications->notify($userId, $title, $body, $type, [
+                'application_id' => (int) $application['id'],
+                'job_id' => (int) $application['job_id'],
+            ]);
+        }
     }
 }

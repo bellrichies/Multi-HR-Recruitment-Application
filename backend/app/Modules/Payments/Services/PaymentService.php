@@ -7,6 +7,7 @@ namespace App\Modules\Payments\Services;
 use App\Core\Database;
 use App\Core\HttpException;
 use App\Modules\Audit\Services\AuditLogService;
+use App\Modules\Notifications\Services\NotificationService;
 use App\Modules\Payments\Repositories\PaymentRepository;
 use App\Modules\Payments\Repositories\PaymentWebhookRepository;
 use App\Modules\Wallet\Services\WalletService;
@@ -18,7 +19,8 @@ class PaymentService
         private readonly PaymentWebhookRepository $webhooks,
         private readonly PaystackService $paystack,
         private readonly WalletService $wallets,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly NotificationService $notifications
     ) {
     }
 
@@ -58,6 +60,10 @@ class PaymentService
         $providerReference = (string) ($verification['reference'] ?? $reference);
 
         if ($status !== 'success') {
+            $this->notifications->notify((int) $payment['user_id'], 'Payment failed', 'Payment verification failed. Please retry or contact support.', 'payment_failed', [
+                'payment_id' => (int) $payment['id'],
+                'reference' => $payment['internal_reference'],
+            ]);
             throw new HttpException('Payment verification failed.', 422);
         }
 
@@ -79,6 +85,11 @@ class PaymentService
                 'entity_type' => 'payment',
                 'entity_id' => (int) $payment['id'],
                 'new_values' => ['status' => 'successful', 'provider_reference' => $providerReference],
+            ]);
+            $this->notifications->notify((int) $payment['user_id'], 'Wallet funded', 'Your wallet funding was successful.', 'wallet_funded', [
+                'payment_id' => (int) $payment['id'],
+                'amount' => (float) $payment['amount'],
+                'currency' => $payment['currency'],
             ]);
 
             return $updated;

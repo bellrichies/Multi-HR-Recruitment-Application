@@ -6,6 +6,7 @@ namespace App\Modules\Recruiters\Services;
 
 use App\Core\HttpException;
 use App\Modules\Audit\Services\AuditLogService;
+use App\Modules\Notifications\Services\NotificationService;
 use App\Modules\Recruiters\Repositories\RecruiterDocumentRepository;
 use App\Modules\Recruiters\Repositories\RecruiterProfileRepository;
 use App\Support\FileUpload;
@@ -16,7 +17,8 @@ class RecruiterProfileService
         private readonly RecruiterProfileRepository $profiles,
         private readonly RecruiterDocumentRepository $documents,
         private readonly FileUpload $uploads,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly NotificationService $notifications
     ) {
     }
 
@@ -98,6 +100,13 @@ class RecruiterProfileService
         }
 
         $profile = $this->profiles->updateVerification($profileId, $status, $reviewerId, $reason);
+        $this->notifications->notify(
+            (int) $profile['user_id'],
+            $status === 'verified' ? 'Account approved' : 'Account verification updated',
+            $status === 'verified' ? 'Your recruiter account has been approved.' : 'Your recruiter account verification status has changed.',
+            $status === 'verified' ? 'account_approved' : 'account_suspended',
+            ['recruiter_id' => (int) $profile['id'], 'status' => $status],
+        );
 
         $this->audit->record([
             'actor_id' => $reviewerId,
