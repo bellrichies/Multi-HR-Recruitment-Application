@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'system_roles' => [
+        'super_admin',
+        'relationship_officer',
+        'hr_officer',
+        'recruiter',
+        'job_seeker',
+    ],
+    'permissions' => [
+        'users.view',
+        'users.create',
+        'users.update',
+        'users.suspend',
+        'roles.view',
+        'roles.create',
+        'roles.update',
+        'roles.delete',
+        'permissions.view',
+        'permissions.assign',
+        'jobs.view',
+        'jobs.create',
+        'jobs.update',
+        'jobs.approve',
+        'jobs.publish',
+        'jobs.assign',
+        'jobs.close',
+        'candidates.discover',
+        'candidates.match',
+        'candidates.unlock',
+        'candidates.view_full_profile',
+        'applications.view',
+        'applications.update',
+        'applications.move_stage',
+        'wallet.view',
+        'wallet.fund',
+        'wallet.debit',
+        'wallet.credit',
+        'reports.view',
+        'reports.export',
+        'settings.manage',
+        'audit.view',
+    ],
+];
