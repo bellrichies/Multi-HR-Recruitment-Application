@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
+use App\Modules\Applications\Controllers\ApplicationController;
 use App\Modules\Auth\Controllers\AuthController;
 use App\Modules\HR\Controllers\HrOfficerProfileController;
 use App\Modules\Jobs\Controllers\JobController;
 use App\Modules\JobSeekers\Controllers\JobSeekerProfileController;
+use App\Modules\Matching\Controllers\CandidateController;
 use App\Modules\Permissions\Controllers\PermissionController;
 use App\Modules\Recruiters\Controllers\RecruiterProfileController;
 use App\Modules\RelationshipOfficers\Controllers\RelationshipOfficerProfileController;
@@ -96,6 +98,12 @@ $router->get('/api/v1/jobs', [JobController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:jobs.view']);
 $router->post('/api/v1/jobs', [JobController::class, 'store'])
     ->middleware(['security_headers', 'auth', 'permission:jobs.create', 'json']);
+$router->post('/api/v1/jobs/{id}/apply', [ApplicationController::class, 'apply'])
+    ->middleware(['security_headers', 'auth', 'permission:applications.create', 'json']);
+$router->get('/api/v1/jobs/{id}/candidate-matches', [CandidateController::class, 'jobMatches'])
+    ->middleware(['security_headers', 'auth', 'permission:candidates.match']);
+$router->post('/api/v1/jobs/{id}/match-candidates', [CandidateController::class, 'matchCandidates'])
+    ->middleware(['security_headers', 'auth', 'permission:candidates.match', 'json']);
 $router->get('/api/v1/jobs/{id}', [JobController::class, 'show'])
     ->middleware(['security_headers', 'auth', 'permission:jobs.view']);
 $router->put('/api/v1/jobs/{id}', [JobController::class, 'update'])
@@ -116,3 +124,23 @@ $router->post('/api/v1/jobs/{id}/assign-hr-officer', [JobController::class, 'ass
     ->middleware(['security_headers', 'auth', 'permission:jobs.assign', 'json']);
 $router->post('/api/v1/jobs/{id}/assign-relationship-officer', [JobController::class, 'assignRelationshipOfficer'])
     ->middleware(['security_headers', 'auth', 'permission:jobs.assign', 'json']);
+
+$router->get('/api/v1/applications', [ApplicationController::class, 'index'])
+    ->middleware(['security_headers', 'auth', 'permission:applications.view']);
+$router->get('/api/v1/applications/{id}', [ApplicationController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:applications.view']);
+$router->post('/api/v1/applications/{id}/move-stage', [ApplicationController::class, 'moveStage'])
+    ->middleware(['security_headers', 'auth', 'permission:applications.move_stage', 'json']);
+$router->post('/api/v1/applications/{id}/shortlist', [ApplicationController::class, 'shortlist'])
+    ->middleware(['security_headers', 'auth', 'permission:applications.shortlist']);
+$router->post('/api/v1/applications/{id}/reject', [ApplicationController::class, 'reject'])
+    ->middleware(['security_headers', 'auth', 'permission:applications.reject']);
+$router->post('/api/v1/applications/{id}/withdraw', [ApplicationController::class, 'withdraw'])
+    ->middleware(['security_headers', 'auth']);
+
+$router->get('/api/v1/candidates/discover', [CandidateController::class, 'discover'])
+    ->middleware(['security_headers', 'auth', 'permission:candidates.discover']);
+$router->get('/api/v1/candidates/{id}/summary', [CandidateController::class, 'summary'])
+    ->middleware(['security_headers', 'auth', 'permission:candidates.discover']);
+$router->get('/api/v1/candidates/{id}/full-profile', [CandidateController::class, 'fullProfile'])
+    ->middleware(['security_headers', 'auth', 'permission:candidates.view_full_profile']);

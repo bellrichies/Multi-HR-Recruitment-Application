@@ -53,10 +53,10 @@ return function (PDO $db): void {
     }
 
     $defaultRolePermissions = [
-        'recruiter' => ['recruiters.update', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close'],
-        'job_seeker' => ['job_seekers.update'],
-        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close'],
-        'relationship_officer' => ['relationship_officers.update', 'recruiters.view', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close'],
+        'recruiter' => ['recruiters.update', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view', 'candidates.discover', 'candidates.unlock', 'candidates.view_full_profile'],
+        'job_seeker' => ['job_seekers.update', 'applications.view', 'applications.create'],
+        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view', 'applications.update', 'applications.shortlist', 'applications.reject', 'applications.move_stage', 'candidates.discover', 'candidates.match', 'candidates.view_full_profile'],
+        'relationship_officer' => ['relationship_officers.update', 'recruiters.view', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view'],
     ];
     $roleLookup = $db->query('SELECT slug, id FROM roles')->fetchAll(PDO::FETCH_KEY_PAIR);
     $permissionLookup = $db->query('SELECT slug, id FROM permissions')->fetchAll(PDO::FETCH_KEY_PAIR);
