@@ -6,8 +6,10 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
 use App\Modules\Applications\Controllers\ApplicationController;
+use App\Modules\Assessments\Controllers\AssessmentController;
 use App\Modules\Auth\Controllers\AuthController;
 use App\Modules\HR\Controllers\HrOfficerProfileController;
+use App\Modules\Interviews\Controllers\InterviewController;
 use App\Modules\Jobs\Controllers\JobController;
 use App\Modules\JobSeekers\Controllers\JobSeekerProfileController;
 use App\Modules\Matching\Controllers\CandidateController;
@@ -165,3 +167,37 @@ $router->get('/api/v1/payments', [PaymentController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:payments.view']);
 $router->get('/api/v1/payments/{id}', [PaymentController::class, 'show'])
     ->middleware(['security_headers', 'auth', 'permission:payments.view']);
+
+$router->get('/api/v1/assessments', [AssessmentController::class, 'index'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.view']);
+$router->post('/api/v1/assessments', [AssessmentController::class, 'store'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.create', 'json']);
+$router->get('/api/v1/assessments/{id}', [AssessmentController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.view']);
+$router->put('/api/v1/assessments/{id}', [AssessmentController::class, 'update'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.update', 'json']);
+$router->post('/api/v1/assessments/{id}/questions', [AssessmentController::class, 'addQuestion'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.update', 'json']);
+$router->post('/api/v1/assessments/{id}/assign', [AssessmentController::class, 'assign'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.assign', 'json']);
+$router->post('/api/v1/assessment-assignments/{id}/start', [AssessmentController::class, 'start'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.take']);
+$router->post('/api/v1/assessment-assignments/{id}/submit', [AssessmentController::class, 'submit'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.take', 'json']);
+$router->post('/api/v1/assessment-assignments/{id}/grade', [AssessmentController::class, 'grade'])
+    ->middleware(['security_headers', 'auth', 'permission:assessments.grade', 'json']);
+
+$router->get('/api/v1/interviews', [InterviewController::class, 'index'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.view']);
+$router->post('/api/v1/interviews', [InterviewController::class, 'store'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.schedule', 'json']);
+$router->get('/api/v1/interviews/{id}', [InterviewController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.view']);
+$router->put('/api/v1/interviews/{id}', [InterviewController::class, 'update'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.reschedule', 'json']);
+$router->post('/api/v1/interviews/{id}/reschedule', [InterviewController::class, 'reschedule'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.reschedule', 'json']);
+$router->post('/api/v1/interviews/{id}/cancel', [InterviewController::class, 'cancel'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.cancel']);
+$router->post('/api/v1/interviews/{id}/feedback', [InterviewController::class, 'feedback'])
+    ->middleware(['security_headers', 'auth', 'permission:interviews.feedback', 'json']);

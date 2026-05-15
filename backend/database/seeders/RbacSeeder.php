@@ -53,9 +53,9 @@ return function (PDO $db): void {
     }
 
     $defaultRolePermissions = [
-        'recruiter' => ['recruiters.update', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view', 'candidates.discover', 'candidates.unlock', 'candidates.view_full_profile', 'wallet.view', 'wallet.fund', 'transactions.view', 'payments.view'],
-        'job_seeker' => ['job_seekers.update', 'applications.view', 'applications.create'],
-        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view', 'applications.update', 'applications.shortlist', 'applications.reject', 'applications.move_stage', 'candidates.discover', 'candidates.match', 'candidates.view_full_profile'],
+        'recruiter' => ['recruiters.update', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view', 'candidates.discover', 'candidates.unlock', 'candidates.view_full_profile', 'wallet.view', 'wallet.fund', 'transactions.view', 'payments.view', 'assessments.view', 'interviews.view', 'interviews.feedback'],
+        'job_seeker' => ['job_seekers.update', 'applications.view', 'applications.create', 'assessments.view', 'assessments.take', 'interviews.view'],
+        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view', 'applications.update', 'applications.shortlist', 'applications.reject', 'applications.move_stage', 'candidates.discover', 'candidates.match', 'candidates.view_full_profile', 'assessments.view', 'assessments.create', 'assessments.update', 'assessments.assign', 'assessments.grade', 'interviews.view', 'interviews.schedule', 'interviews.reschedule', 'interviews.cancel', 'interviews.feedback'],
         'relationship_officer' => ['relationship_officers.update', 'recruiters.view', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close', 'applications.view'],
     ];
     $roleLookup = $db->query('SELECT slug, id FROM roles')->fetchAll(PDO::FETCH_KEY_PAIR);
