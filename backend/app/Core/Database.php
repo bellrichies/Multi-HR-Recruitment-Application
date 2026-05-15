@@ -45,6 +45,10 @@ class Database
     {
         $pdo = self::connection();
 
+        if ($pdo->inTransaction()) {
+            return $callback($pdo);
+        }
+
         try {
             $pdo->beginTransaction();
             $result = $callback($pdo);

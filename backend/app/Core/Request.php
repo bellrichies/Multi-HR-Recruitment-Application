@@ -7,6 +7,7 @@ namespace App\Core;
 class Request
 {
     private ?array $json = null;
+    private ?string $rawBody = null;
     private array $attributes = [];
 
     public function method(): string
@@ -48,6 +49,15 @@ class Request
     public function all(): array
     {
         return $this->input();
+    }
+
+    public function raw(): string
+    {
+        if ($this->rawBody !== null) {
+            return $this->rawBody;
+        }
+
+        return $this->rawBody = file_get_contents('php://input') ?: '';
     }
 
     public function files(?string $key = null): mixed
@@ -112,7 +122,7 @@ class Request
             return $this->json = [];
         }
 
-        $raw = file_get_contents('php://input') ?: '';
+        $raw = $this->raw();
         $decoded = $raw === '' ? [] : json_decode($raw, true);
 
         if (json_last_error() !== JSON_ERROR_NONE || ! is_array($decoded)) {

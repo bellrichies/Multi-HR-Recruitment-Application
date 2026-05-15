@@ -10,6 +10,7 @@ use App\Modules\Audit\Services\AuditLogService;
 use App\Modules\Auth\Repositories\TokenRepository;
 use App\Modules\Roles\Repositories\RoleRepository;
 use App\Modules\Users\Repositories\UserRepository;
+use App\Modules\Wallet\Services\WalletService;
 use App\Support\Auth\JwtService;
 use App\Support\Auth\Password;
 
@@ -20,7 +21,8 @@ class AuthService
         private readonly RoleRepository $roles,
         private readonly TokenRepository $tokens,
         private readonly JwtService $jwt,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly WalletService $wallets
     ) {
     }
 
@@ -107,6 +109,7 @@ class AuthService
             ]);
 
             $this->users->assignRoles((int) $user['id'], [(int) $role['id']]);
+            $this->wallets->getOrCreate((int) $user['id']);
 
             $this->audit->record([
                 'actor_id' => (int) $user['id'],

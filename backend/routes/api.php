@@ -11,11 +11,14 @@ use App\Modules\HR\Controllers\HrOfficerProfileController;
 use App\Modules\Jobs\Controllers\JobController;
 use App\Modules\JobSeekers\Controllers\JobSeekerProfileController;
 use App\Modules\Matching\Controllers\CandidateController;
+use App\Modules\Matching\Controllers\CandidateUnlockController;
+use App\Modules\Payments\Controllers\PaymentController;
 use App\Modules\Permissions\Controllers\PermissionController;
 use App\Modules\Recruiters\Controllers\RecruiterProfileController;
 use App\Modules\RelationshipOfficers\Controllers\RelationshipOfficerProfileController;
 use App\Modules\Roles\Controllers\RoleController;
 use App\Modules\Users\Controllers\UserRoleController;
+use App\Modules\Wallet\Controllers\WalletController;
 
 /** @var Router $router */
 
@@ -144,3 +147,21 @@ $router->get('/api/v1/candidates/{id}/summary', [CandidateController::class, 'su
     ->middleware(['security_headers', 'auth', 'permission:candidates.discover']);
 $router->get('/api/v1/candidates/{id}/full-profile', [CandidateController::class, 'fullProfile'])
     ->middleware(['security_headers', 'auth', 'permission:candidates.view_full_profile']);
+$router->post('/api/v1/candidates/{id}/unlock', [CandidateUnlockController::class, 'store'])
+    ->middleware(['security_headers', 'auth', 'permission:candidates.unlock', 'json']);
+
+$router->get('/api/v1/wallet', [WalletController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:wallet.view']);
+$router->post('/api/v1/wallet/fund', [WalletController::class, 'fund'])
+    ->middleware(['security_headers', 'auth', 'permission:wallet.fund', 'json']);
+$router->get('/api/v1/wallet/transactions', [WalletController::class, 'transactions'])
+    ->middleware(['security_headers', 'auth', 'permission:transactions.view']);
+
+$router->post('/api/v1/payments/paystack/callback', [PaymentController::class, 'callback'])
+    ->middleware(['security_headers', 'json']);
+$router->post('/api/v1/payments/paystack/webhook', [PaymentController::class, 'webhook'])
+    ->middleware(['security_headers']);
+$router->get('/api/v1/payments', [PaymentController::class, 'index'])
+    ->middleware(['security_headers', 'auth', 'permission:payments.view']);
+$router->get('/api/v1/payments/{id}', [PaymentController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:payments.view']);
