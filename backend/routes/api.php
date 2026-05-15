@@ -20,6 +20,7 @@ use App\Modules\Payments\Controllers\PaymentController;
 use App\Modules\Permissions\Controllers\PermissionController;
 use App\Modules\Recruiters\Controllers\RecruiterProfileController;
 use App\Modules\RelationshipOfficers\Controllers\RelationshipOfficerProfileController;
+use App\Modules\Reports\Controllers\ReportController;
 use App\Modules\Roles\Controllers\RoleController;
 use App\Modules\Users\Controllers\UserRoleController;
 use App\Modules\Wallet\Controllers\WalletController;
@@ -227,3 +228,22 @@ $router->put('/api/v1/notification-preferences', [NotificationController::class,
     ->middleware(['security_headers', 'auth', 'permission:notifications.manage', 'json']);
 $router->post('/api/v1/notifications/{id}/read', [NotificationController::class, 'markRead'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.manage']);
+
+$router->get('/api/v1/reports/admin/summary', [ReportController::class, 'adminSummary'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/hr-officer/summary', [ReportController::class, 'hrOfficerSummary'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/relationship-officer/summary', [ReportController::class, 'relationshipOfficerSummary'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/recruiter/summary', [ReportController::class, 'recruiterSummary'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/job-seeker/summary', [ReportController::class, 'jobSeekerSummary'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/financial', [ReportController::class, 'financial'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/placements', [ReportController::class, 'placements'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.view']);
+$router->get('/api/v1/reports/audit', [ReportController::class, 'audit'])
+    ->middleware(['security_headers', 'auth', 'permission:audit.view']);
+$router->get('/api/v1/reports/export/{type}', [ReportController::class, 'export'])
+    ->middleware(['security_headers', 'auth', 'permission:reports.export']);
