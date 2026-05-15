@@ -53,10 +53,10 @@ return function (PDO $db): void {
     }
 
     $defaultRolePermissions = [
-        'recruiter' => ['recruiters.update'],
+        'recruiter' => ['recruiters.update', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close'],
         'job_seeker' => ['job_seekers.update'],
-        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr'],
-        'relationship_officer' => ['relationship_officers.update', 'recruiters.view'],
+        'hr_officer' => ['hr_officers.update', 'job_seekers.view', 'job_seekers.verify', 'job_seekers.assign_hr', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close'],
+        'relationship_officer' => ['relationship_officers.update', 'recruiters.view', 'jobs.view', 'jobs.create', 'jobs.update', 'jobs.close'],
     ];
     $roleLookup = $db->query('SELECT slug, id FROM roles')->fetchAll(PDO::FETCH_KEY_PAIR);
     $permissionLookup = $db->query('SELECT slug, id FROM permissions')->fetchAll(PDO::FETCH_KEY_PAIR);

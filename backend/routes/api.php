@@ -7,6 +7,7 @@ use App\Core\Response;
 use App\Core\Router;
 use App\Modules\Auth\Controllers\AuthController;
 use App\Modules\HR\Controllers\HrOfficerProfileController;
+use App\Modules\Jobs\Controllers\JobController;
 use App\Modules\JobSeekers\Controllers\JobSeekerProfileController;
 use App\Modules\Permissions\Controllers\PermissionController;
 use App\Modules\Recruiters\Controllers\RecruiterProfileController;
@@ -86,3 +87,32 @@ $router->get('/api/v1/relationship-officers/profile', [RelationshipOfficerProfil
     ->middleware(['security_headers', 'auth', 'permission:relationship_officers.update']);
 $router->put('/api/v1/relationship-officers/profile', [RelationshipOfficerProfileController::class, 'update'])
     ->middleware(['security_headers', 'auth', 'permission:relationship_officers.update', 'json']);
+
+$router->get('/api/v1/public/jobs', [JobController::class, 'publicIndex'])
+    ->middleware(['security_headers']);
+$router->get('/api/v1/public/jobs/{slug}', [JobController::class, 'publicShow'])
+    ->middleware(['security_headers']);
+$router->get('/api/v1/jobs', [JobController::class, 'index'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.view']);
+$router->post('/api/v1/jobs', [JobController::class, 'store'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.create', 'json']);
+$router->get('/api/v1/jobs/{id}', [JobController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.view']);
+$router->put('/api/v1/jobs/{id}', [JobController::class, 'update'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.update', 'json']);
+$router->post('/api/v1/jobs/{id}/submit-for-approval', [JobController::class, 'submitForApproval'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.update']);
+$router->post('/api/v1/jobs/{id}/approve', [JobController::class, 'approve'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.approve']);
+$router->post('/api/v1/jobs/{id}/publish', [JobController::class, 'publish'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.publish']);
+$router->post('/api/v1/jobs/{id}/pause', [JobController::class, 'pause'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.update']);
+$router->post('/api/v1/jobs/{id}/close', [JobController::class, 'close'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.close']);
+$router->post('/api/v1/jobs/{id}/cancel', [JobController::class, 'cancel'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.close']);
+$router->post('/api/v1/jobs/{id}/assign-hr-officer', [JobController::class, 'assignHrOfficer'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.assign', 'json']);
+$router->post('/api/v1/jobs/{id}/assign-relationship-officer', [JobController::class, 'assignRelationshipOfficer'])
+    ->middleware(['security_headers', 'auth', 'permission:jobs.assign', 'json']);

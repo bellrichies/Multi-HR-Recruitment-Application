@@ -22,4 +22,21 @@ class FoundationTest extends TestCase
         $this->assertSame(['ok' => true], $payload['data']);
         $this->assertArrayHasKey('meta', $payload);
     }
+
+    public function testEmptyCollectionDataRemainsArray(): void
+    {
+        ob_start();
+
+        Response::success([], 'Records retrieved successfully.', [
+            'current_page' => 1,
+            'per_page' => 20,
+            'total' => 0,
+            'last_page' => 1,
+        ]);
+
+        $payload = json_decode((string) ob_get_clean(), true);
+
+        $this->assertSame([], $payload['data']);
+        $this->assertSame(0, $payload['meta']['total']);
+    }
 }

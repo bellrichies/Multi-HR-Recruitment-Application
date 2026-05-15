@@ -15,7 +15,7 @@ class Response
         self::json([
             'success' => true,
             'message' => $message,
-            'data' => self::objectWhenEmpty($data),
+            'data' => $data,
             'meta' => self::objectWhenEmpty($meta),
         ], $status);
     }

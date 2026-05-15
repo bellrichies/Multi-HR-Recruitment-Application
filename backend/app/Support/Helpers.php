@@ -64,3 +64,14 @@ if (! function_exists('uuid_create_local')) {
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }
+
+if (! function_exists('slug_create')) {
+    function slug_create(string $value): string
+    {
+        $slug = strtolower(trim($value));
+        $slug = preg_replace('/[^a-z0-9]+/', '-', $slug) ?: '';
+        $slug = trim($slug, '-');
+
+        return $slug === '' ? bin2hex(random_bytes(6)) : $slug;
+    }
+}
