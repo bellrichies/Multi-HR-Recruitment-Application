@@ -9,7 +9,7 @@ import { ApplicationPipelinePage } from './modules/applications/ApplicationPipel
 import { AssessmentsPage } from './modules/assessments/AssessmentsPage';
 import { CandidateDiscoveryPage } from './modules/candidates/CandidateDiscoveryPage';
 import { ForbiddenPage } from './modules/common/ForbiddenPage';
-import { DashboardPage, DashboardRedirect } from './modules/dashboard/DashboardPage';
+import { DashboardRedirect, RoleDashboardPage } from './modules/dashboard/DashboardPage';
 import { InterviewsPage } from './modules/interviews/InterviewsPage';
 import { JobDetailPage } from './modules/jobs/JobDetailPage';
 import { JobsPage } from './modules/jobs/JobsPage';
@@ -36,11 +36,11 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<DashboardRedirect />} />
-            <Route path="/dashboard/admin" element={<DashboardPage role="super_admin" />} />
-            <Route path="/dashboard/hr-officer" element={<DashboardPage role="hr_officer" />} />
-            <Route path="/dashboard/relationship-officer" element={<DashboardPage role="relationship_officer" />} />
-            <Route path="/dashboard/recruiter" element={<DashboardPage role="recruiter" />} />
-            <Route path="/dashboard/job-seeker" element={<DashboardPage role="job_seeker" />} />
+            <Route path="/dashboard/admin" element={<RoleDashboardPage role="super_admin" />} />
+            <Route path="/dashboard/hr-officer" element={<RoleDashboardPage role="hr_officer" />} />
+            <Route path="/dashboard/relationship-officer" element={<RoleDashboardPage role="relationship_officer" />} />
+            <Route path="/dashboard/recruiter" element={<RoleDashboardPage role="recruiter" />} />
+            <Route path="/dashboard/job-seeker" element={<RoleDashboardPage role="job_seeker" />} />
             <Route element={<PermissionRoute permission="jobs.view" />}>
               <Route path="/jobs" element={<JobsPage />} />
               <Route path="/jobs/:id" element={<JobDetailPage />} />

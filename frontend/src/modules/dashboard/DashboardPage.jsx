@@ -10,6 +10,7 @@ import { DataTable } from '../../components/tables/DataTable';
 import { useApi } from '../../hooks/useApi';
 import { useAuth } from '../../store/auth.store';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { dashboardForUser } from '../../utils/roles';
 
 const roleTitles = {
   super_admin: 'Super Admin Dashboard',
@@ -58,6 +59,20 @@ export function DashboardPage({ role }) {
       <DashboardTables role={role} data={data || {}} />
     </div>
   );
+}
+
+export function RoleDashboardPage({ role }) {
+  const { user } = useAuth();
+  const roleSlugs = (user?.roles || []).map((item) => item.slug || item);
+  const isAllowed = role === 'super_admin'
+    ? roleSlugs.includes('super_admin')
+    : roleSlugs.includes(role);
+
+  if (!isAllowed) {
+    return <Navigate replace to={dashboardForUser(user)} />;
+  }
+
+  return <DashboardPage role={role} />;
 }
 
 function dashboardStats(role, data) {

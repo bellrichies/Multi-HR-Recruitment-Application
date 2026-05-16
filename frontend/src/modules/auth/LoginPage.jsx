@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { login } from '../../api/auth.api';
 import { Button } from '../../components/ui/Button';
@@ -14,7 +14,6 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const auth = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   async function submit(event) {
     event.preventDefault();
@@ -25,7 +24,7 @@ export function LoginPage() {
       const data = await login(form);
       const user = data.user || data;
       auth.setSession(data.token || data.access_token, user);
-      navigate(location.state?.from?.pathname || dashboardForUser(user), { replace: true });
+      navigate(dashboardForUser(user), { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
