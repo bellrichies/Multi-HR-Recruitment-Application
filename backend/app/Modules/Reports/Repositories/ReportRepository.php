@@ -404,6 +404,10 @@ class ReportRepository
 
     private function activityLogs(int $limit): array
     {
+        if (! $this->tableExists('activity_logs')) {
+            return [];
+        }
+
         return $this->rows(
             "SELECT activity_logs.*, CONCAT(users.first_name, ' ', users.last_name) user_name, users.email user_email
              FROM activity_logs
@@ -411,6 +415,18 @@ class ReportRepository
              ORDER BY activity_logs.created_at DESC, activity_logs.id DESC
              LIMIT {$limit}"
         );
+    }
+
+    private function tableExists(string $table): bool
+    {
+        $statement = $this->connection()->prepare(
+            'SELECT COUNT(*)
+             FROM information_schema.tables
+             WHERE table_schema = DATABASE() AND table_name = :table'
+        );
+        $statement->execute(['table' => $table]);
+
+        return (int) $statement->fetchColumn() > 0;
     }
 
     private function countsBy(string $table, string $column, string $where = '1 = 1'): array
