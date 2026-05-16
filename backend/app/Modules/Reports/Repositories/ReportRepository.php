@@ -248,9 +248,9 @@ class ReportRepository
                     'SELECT COUNT(*) FROM messages
                      INNER JOIN conversation_participants ON conversation_participants.conversation_id = messages.conversation_id
                      WHERE conversation_participants.user_id = :user_id
-                       AND messages.sender_id != :user_id
+                       AND messages.sender_id != :sender_user_id
                        AND messages.created_at > COALESCE(conversation_participants.last_read_at, "1970-01-01")',
-                    ['user_id' => $userId]
+                    ['user_id' => $userId, 'sender_user_id' => $userId]
                 ),
             ],
             'analytics' => [
