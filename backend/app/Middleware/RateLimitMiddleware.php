@@ -34,6 +34,10 @@ class RateLimitMiddleware
             file_put_contents($file, json_encode($state, JSON_THROW_ON_ERROR), LOCK_EX);
         }
 
+        header('X-RateLimit-Limit: ' . $limit);
+        header('X-RateLimit-Remaining: ' . max(0, $limit - (int) $state['hits']));
+        header('X-RateLimit-Reset: ' . (int) $state['reset_at']);
+
         if ($state['hits'] > $limit) {
             throw new HttpException('Too many requests. Please try again later.', 429);
         }

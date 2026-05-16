@@ -5,10 +5,12 @@
 /backend/storage/cache/*
 /backend/storage/queues/*
 /backend/storage/uploads/*
+/backend/storage/backups/*
 !/backend/storage/logs/.gitkeep
 !/backend/storage/cache/.gitkeep
 !/backend/storage/queues/.gitkeep
 !/backend/storage/uploads/.gitkeep
+!/backend/storage/backups/.gitkeep
 
 node_modules/
 dist/

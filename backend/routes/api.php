@@ -60,7 +60,7 @@ $router->get('/api/v1/recruiters/profile', [RecruiterProfileController::class, '
 $router->put('/api/v1/recruiters/profile', [RecruiterProfileController::class, 'update'])
     ->middleware(['security_headers', 'auth', 'permission:recruiters.update', 'json']);
 $router->post('/api/v1/recruiters/documents', [RecruiterProfileController::class, 'uploadDocument'])
-    ->middleware(['security_headers', 'auth', 'permission:recruiters.update']);
+    ->middleware(['security_headers', 'auth', 'permission:recruiters.update', 'rate_limit:10,60']);
 $router->get('/api/v1/recruiters/{id}', [RecruiterProfileController::class, 'show'])
     ->middleware(['security_headers', 'auth', 'permission:recruiters.view']);
 $router->post('/api/v1/recruiters/{id}/verify', [RecruiterProfileController::class, 'verify'])
@@ -81,7 +81,7 @@ $router->post('/api/v1/job-seekers/educations', [JobSeekerProfileController::cla
 $router->post('/api/v1/job-seekers/certifications', [JobSeekerProfileController::class, 'addCertification'])
     ->middleware(['security_headers', 'auth', 'permission:job_seekers.update']);
 $router->post('/api/v1/job-seekers/documents', [JobSeekerProfileController::class, 'uploadDocument'])
-    ->middleware(['security_headers', 'auth', 'permission:job_seekers.update']);
+    ->middleware(['security_headers', 'auth', 'permission:job_seekers.update', 'rate_limit:10,60']);
 $router->post('/api/v1/job-seekers/guarantors', [JobSeekerProfileController::class, 'addGuarantor'])
     ->middleware(['security_headers', 'auth', 'permission:job_seekers.update']);
 $router->post('/api/v1/job-seekers/documents/{id}/review', [JobSeekerProfileController::class, 'reviewDocument'])
@@ -153,12 +153,12 @@ $router->get('/api/v1/candidates/{id}/summary', [CandidateController::class, 'su
 $router->get('/api/v1/candidates/{id}/full-profile', [CandidateController::class, 'fullProfile'])
     ->middleware(['security_headers', 'auth', 'permission:candidates.view_full_profile']);
 $router->post('/api/v1/candidates/{id}/unlock', [CandidateUnlockController::class, 'store'])
-    ->middleware(['security_headers', 'auth', 'permission:candidates.unlock', 'json']);
+    ->middleware(['security_headers', 'auth', 'permission:candidates.unlock', 'rate_limit:10,60', 'json']);
 
 $router->get('/api/v1/wallet', [WalletController::class, 'show'])
     ->middleware(['security_headers', 'auth', 'permission:wallet.view']);
 $router->post('/api/v1/wallet/fund', [WalletController::class, 'fund'])
-    ->middleware(['security_headers', 'auth', 'permission:wallet.fund', 'json']);
+    ->middleware(['security_headers', 'auth', 'permission:wallet.fund', 'rate_limit:10,60', 'json']);
 $router->get('/api/v1/wallet/transactions', [WalletController::class, 'transactions'])
     ->middleware(['security_headers', 'auth', 'permission:transactions.view']);
 
@@ -208,13 +208,13 @@ $router->post('/api/v1/interviews/{id}/feedback', [InterviewController::class, '
 $router->get('/api/v1/conversations', [ConversationController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 $router->post('/api/v1/conversations', [ConversationController::class, 'store'])
-    ->middleware(['security_headers', 'auth', 'permission:messages.send', 'json']);
+    ->middleware(['security_headers', 'auth', 'permission:messages.send', 'rate_limit:60,60', 'json']);
 $router->get('/api/v1/conversations/unread-count', [ConversationController::class, 'unreadCount'])
     ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 $router->get('/api/v1/conversations/{id}/messages', [ConversationController::class, 'messages'])
     ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 $router->post('/api/v1/conversations/{id}/messages', [ConversationController::class, 'send'])
-    ->middleware(['security_headers', 'auth', 'permission:messages.send', 'json']);
+    ->middleware(['security_headers', 'auth', 'permission:messages.send', 'rate_limit:60,60', 'json']);
 
 $router->get('/api/v1/notifications', [NotificationController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.view']);

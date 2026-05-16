@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - master
       - develop
       - staging
 
@@ -35,3 +36,56 @@ jobs:
 
       - name: Run tests
         run: vendor/bin/phpunit
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - frontend
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Start local API
+        run: php -S 127.0.0.1:8080 -t public > /tmp/multi-hr-api.log 2>&1 &
+
+      - name: Run smoke tests
+        run: php bin/smoke_test.php http://127.0.0.1:8080

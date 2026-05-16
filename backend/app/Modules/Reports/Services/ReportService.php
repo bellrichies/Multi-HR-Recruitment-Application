@@ -7,12 +7,14 @@ namespace App\Modules\Reports\Services;
 use App\Core\HttpException;
 use App\Modules\Audit\Services\AuditLogService;
 use App\Modules\Reports\Repositories\ReportRepository;
+use App\Support\Cache\FileCache;
 
 class ReportService
 {
     public function __construct(
         private readonly ReportRepository $reports,
-        private readonly AuditLogService $audit
+        private readonly AuditLogService $audit,
+        private readonly FileCache $cache
     ) {
     }
 
@@ -20,35 +22,35 @@ class ReportService
     {
         $this->requireSuperAdmin($user);
 
-        return $this->reports->superAdminSummary();
+        return $this->cacheDashboard('super_admin', (int) $user['id'], fn (): array => $this->reports->superAdminSummary());
     }
 
     public function hrOfficerDashboard(array $user): array
     {
         $this->requireRole($user, 'hr_officer');
 
-        return $this->reports->hrSummary((int) $user['id']);
+        return $this->cacheDashboard('hr_officer', (int) $user['id'], fn (): array => $this->reports->hrSummary((int) $user['id']));
     }
 
     public function relationshipOfficerDashboard(array $user): array
     {
         $this->requireRole($user, 'relationship_officer');
 
-        return $this->reports->relationshipOfficerSummary((int) $user['id']);
+        return $this->cacheDashboard('relationship_officer', (int) $user['id'], fn (): array => $this->reports->relationshipOfficerSummary((int) $user['id']));
     }
 
     public function recruiterDashboard(array $user): array
     {
         $this->requireRole($user, 'recruiter');
 
-        return $this->reports->recruiterSummary((int) $user['id']);
+        return $this->cacheDashboard('recruiter', (int) $user['id'], fn (): array => $this->reports->recruiterSummary((int) $user['id']));
     }
 
     public function jobSeekerDashboard(array $user): array
     {
         $this->requireRole($user, 'job_seeker');
 
-        return $this->reports->jobSeekerSummary((int) $user['id']);
+        return $this->cacheDashboard('job_seeker', (int) $user['id'], fn (): array => $this->reports->jobSeekerSummary((int) $user['id']));
     }
 
     public function financial(array $user): array
@@ -117,5 +119,12 @@ class ReportService
         }
 
         throw new HttpException('You are not allowed to access this dashboard.', 403);
+    }
+
+    private function cacheDashboard(string $role, int $userId, callable $callback): array
+    {
+        $ttl = (int) env('DASHBOARD_CACHE_TTL', 60);
+
+        return $this->cache->remember("dashboard.{$role}.{$userId}", $ttl, $callback);
     }
 }

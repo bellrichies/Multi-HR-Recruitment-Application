@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Support\Sanitizer;
+
 class Validator
 {
     protected array $errors = [];
@@ -22,7 +24,9 @@ class Validator
             }
 
             if (array_key_exists($field, $data)) {
-                $validated[$field] = is_string($value) ? trim($value) : $value;
+                $validated[$field] = is_string($value) && ! str_contains($field, 'password')
+                    ? Sanitizer::string($value)
+                    : (is_string($value) ? trim($value) : $value);
             }
         }
 

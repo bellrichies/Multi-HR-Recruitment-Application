@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: email-queue-worker
+  namespace: multi-hr
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: email-queue
+              image: ghcr.io/your-org/multi-hr-backend:latest
+              command: ["php", "bin/process_email_queue.php", "50"]
+              envFrom:
+                - configMapRef:
+                    name: multi-hr-config
+                - secretRef:
+                    name: multi-hr-secrets
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup
+  namespace: multi-hr
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: ghcr.io/your-org/multi-hr-backend:latest
+              command: ["php", "bin/backup_database.php"]
+              envFrom:
+                - configMapRef:
+                    name: multi-hr-config
+                - secretRef:
+                    name: multi-hr-secrets

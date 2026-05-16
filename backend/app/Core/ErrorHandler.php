@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
+use App\Support\Logger;
 use Throwable;
 
 class ErrorHandler
@@ -32,7 +33,7 @@ class ErrorHandler
             return;
         }
 
-        $this->log($exception);
+        (new Logger())->exception($exception);
 
         Response::error('An unexpected server error occurred.', $debug ? [
             'exception' => [
@@ -42,20 +43,4 @@ class ErrorHandler
         ] : [], 500);
     }
 
-    private function log(Throwable $exception): void
-    {
-        $logPath = base_path('storage/logs/app.log');
-        $message = sprintf(
-            "[%s] %s in %s:%d%s",
-            date('Y-m-d H:i:s'),
-            $exception->getMessage(),
-            $exception->getFile(),
-            $exception->getLine(),
-            PHP_EOL
-        );
-
-        if (is_dir(dirname($logPath))) {
-            file_put_contents($logPath, $message, FILE_APPEND | LOCK_EX);
-        }
-    }
 }

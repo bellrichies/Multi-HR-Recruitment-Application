@@ -41,7 +41,7 @@ class PaystackService
         $secret = (string) config('services.paystack.webhook_secret') ?: (string) config('services.paystack.secret_key');
 
         if ($secret === '') {
-            return true;
+            return (string) config('app.env') !== 'production';
         }
 
         return is_string($signature) && hash_equals(hash_hmac('sha512', $payload, $secret), $signature);
