@@ -19,7 +19,8 @@ class ConversationResource
                 'name' => trim($participant['first_name'] . ' ' . $participant['last_name']),
                 'email' => $participant['email'],
             ], $participants),
-            'unread_count' => $unreadCount,
+            'unread_count' => $unreadCount ?? (isset($conversation['unread_count']) ? (int) $conversation['unread_count'] : null),
+            'is_favorite' => isset($conversation['is_favorite']) && (int) $conversation['is_favorite'] === 1,
             'created_at' => $conversation['created_at'],
             'updated_at' => $conversation['updated_at'],
         ];
@@ -27,6 +28,6 @@ class ConversationResource
 
     public static function collection(array $conversations): array
     {
-        return array_map(fn (array $conversation): array => self::make($conversation), $conversations);
+        return array_map(fn (array $conversation): array => self::make($conversation, $conversation['participants'] ?? []), $conversations);
     }
 }

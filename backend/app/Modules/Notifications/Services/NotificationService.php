@@ -79,9 +79,31 @@ class NotificationService
         return $this->notifications->listForUser((int) $user['id'], $page, $perPage);
     }
 
+    public function show(int $id, array $user): array
+    {
+        $notification = $this->notifications->findForUser($id, (int) $user['id']);
+
+        if ($notification === null) {
+            throw new HttpException('Notification not found.', 404);
+        }
+
+        return $notification;
+    }
+
     public function markRead(int $id, array $user): array
     {
         $notification = $this->notifications->markRead($id, (int) $user['id']);
+
+        if ($notification === null) {
+            throw new HttpException('Notification not found.', 404);
+        }
+
+        return $notification;
+    }
+
+    public function markUnread(int $id, array $user): array
+    {
+        $notification = $this->notifications->markUnread($id, (int) $user['id']);
 
         if ($notification === null) {
             throw new HttpException('Notification not found.', 404);

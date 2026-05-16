@@ -29,9 +29,42 @@ class MessagingService
     ) {
     }
 
-    public function list(array $user, int $page = 1, int $perPage = 20): array
+    public function list(array $user, int $page = 1, int $perPage = 20, array $filters = []): array
     {
-        return $this->conversations->listForUser((int) $user['id'], $page, $perPage);
+        $result = $this->conversations->listForUser((int) $user['id'], $page, $perPage, $filters);
+        $participants = $this->conversations->participantsForConversations(array_column($result['data'], 'id'));
+
+        foreach ($result['data'] as $index => $conversation) {
+            $result['data'][$index]['participants'] = $participants[(int) $conversation['id']] ?? [];
+        }
+
+        return $result;
+    }
+
+    public function participants(array $user, string $search = '', int $limit = 20, string $conversationType = 'direct', ?int $jobId = null): array
+    {
+        $limit = min(max(1, $limit), 50);
+        $conversationType = in_array($conversationType, ['direct', 'job_context', 'interview_request'], true) ? $conversationType : 'direct';
+        $data = ['conversation_type' => $conversationType];
+
+        if ($jobId !== null) {
+            $data['job_id'] = $jobId;
+        }
+
+        $participants = array_filter(
+            $this->users->messageParticipants((int) $user['id'], $search, max($limit * 2, 50)),
+            fn (array $participant): bool => $this->canStartConversation($user, (int) $participant['id'], $data)
+        );
+
+        return array_slice(array_map(
+            fn (array $participant): array => [
+                'id' => (int) $participant['id'],
+                'name' => trim($participant['first_name'] . ' ' . $participant['last_name']),
+                'email' => $participant['email'],
+                'roles' => array_values(array_filter(explode(',', (string) ($participant['role_slugs'] ?? '')))),
+            ],
+            array_values($participants)
+        ), 0, $limit);
     }
 
     public function create(array $data, array $user, array $context): array
@@ -128,6 +161,24 @@ class MessagingService
         return $this->messages->unreadCount((int) $user['id']);
     }
 
+    public function setFavorite(int $conversationId, array $user, bool $favorite): array
+    {
+        $userId = (int) $user['id'];
+        $this->requireParticipant($conversationId, $userId);
+        $this->conversations->setFavorite($conversationId, $userId, $favorite);
+
+        $conversation = $this->conversations->findForUser($conversationId, $userId);
+
+        if ($conversation === null) {
+            throw new HttpException('Conversation not found.', 404);
+        }
+
+        return [
+            'conversation' => $conversation,
+            'participants' => $this->conversations->participants($conversationId),
+        ];
+    }
+
     private function authorizeConversation(array $user, int $participantUserId, array $data): void
     {
         if ((int) $user['id'] === $participantUserId) {
@@ -155,6 +206,17 @@ class MessagingService
         }
 
         throw new HttpException('You are not allowed to start this conversation.', 403);
+    }
+
+    private function canStartConversation(array $user, int $participantUserId, array $data): bool
+    {
+        try {
+            $this->authorizeConversation($user, $participantUserId, $data);
+
+            return true;
+        } catch (HttpException) {
+            return false;
+        }
     }
 
     private function hrCanMessageCandidate(int $hrUserId, int $candidateUserId): bool

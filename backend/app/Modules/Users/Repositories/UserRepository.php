@@ -91,6 +91,40 @@ class UserRepository
         }
     }
 
+    public function messageParticipants(int $excludeUserId, string $search = '', int $limit = 20): array
+    {
+        $limit = min(max(1, $limit), 100);
+        $where = [
+            'users.deleted_at IS NULL',
+            'users.status = "active"',
+            'users.id <> :exclude_user_id',
+        ];
+        $params = ['exclude_user_id' => $excludeUserId];
+
+        $search = trim($search);
+
+        if ($search !== '') {
+            $where[] = '(users.first_name LIKE :search OR users.last_name LIKE :search OR users.email LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $whereSql = implode(' AND ', $where);
+        $statement = $this->connection()->prepare(
+            "SELECT users.id, users.first_name, users.last_name, users.email,
+                GROUP_CONCAT(roles.slug ORDER BY roles.slug SEPARATOR ',') role_slugs
+             FROM users
+             LEFT JOIN user_roles ON user_roles.user_id = users.id
+             LEFT JOIN roles ON roles.id = user_roles.role_id
+             WHERE {$whereSql}
+             GROUP BY users.id, users.first_name, users.last_name, users.email
+             ORDER BY users.first_name ASC, users.last_name ASC, users.email ASC
+             LIMIT {$limit}"
+        );
+        $statement->execute($params);
+
+        return $statement->fetchAll();
+    }
+
     public function markLastLogin(int $userId): void
     {
         $statement = $this->connection()->prepare(

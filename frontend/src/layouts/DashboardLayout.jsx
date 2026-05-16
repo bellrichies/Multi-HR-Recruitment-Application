@@ -5,6 +5,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../store/auth.store';
 import { dashboardForUser } from '../utils/roles';
 import { PermissionGate } from '../components/navigation/PermissionGate';
+import { NotificationBell } from '../components/navigation/NotificationBell';
 
 const navItems = [
   { label: 'Dashboard', to: '/dashboard', icon: BarChart3 },
@@ -87,9 +88,7 @@ export function DashboardLayout() {
             <p className="truncate text-xs text-muted">{auth.user?.email}</p>
           </div>
           <PermissionGate permission="notifications.view">
-            <NavLink className="focus-ring rounded-md p-2 text-muted hover:bg-panel hover:text-ink" to="/notifications">
-              <Bell size={20} />
-            </NavLink>
+            <NotificationBell />
           </PermissionGate>
         </header>
         <main className="px-4 py-6 sm:px-6 lg:px-8">

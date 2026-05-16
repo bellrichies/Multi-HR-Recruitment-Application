@@ -31,11 +31,25 @@ class NotificationController extends Controller
         $this->success(['unread_count' => $this->notifications->unreadCount($request->user())], 'Unread notification count retrieved successfully.');
     }
 
+    public function show(Request $request, string $id): void
+    {
+        $notification = $this->notifications->show((int) $id, $request->user());
+
+        $this->success(NotificationResource::make($notification), 'Notification retrieved successfully.');
+    }
+
     public function markRead(Request $request, string $id): void
     {
         $notification = $this->notifications->markRead((int) $id, $request->user());
 
         $this->success(NotificationResource::make($notification), 'Notification marked as read.');
+    }
+
+    public function markUnread(Request $request, string $id): void
+    {
+        $notification = $this->notifications->markUnread((int) $id, $request->user());
+
+        $this->success(NotificationResource::make($notification), 'Notification marked as unread.');
     }
 
     public function markAllRead(Request $request): void

@@ -209,16 +209,24 @@ $router->get('/api/v1/conversations', [ConversationController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 $router->post('/api/v1/conversations', [ConversationController::class, 'store'])
     ->middleware(['security_headers', 'auth', 'permission:messages.send', 'rate_limit:60,60', 'json']);
+$router->get('/api/v1/conversations/participants', [ConversationController::class, 'participants'])
+    ->middleware(['security_headers', 'auth', 'permission:messages.send']);
 $router->get('/api/v1/conversations/unread-count', [ConversationController::class, 'unreadCount'])
     ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 $router->get('/api/v1/conversations/{id}/messages', [ConversationController::class, 'messages'])
     ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 $router->post('/api/v1/conversations/{id}/messages', [ConversationController::class, 'send'])
     ->middleware(['security_headers', 'auth', 'permission:messages.send', 'rate_limit:60,60', 'json']);
+$router->post('/api/v1/conversations/{id}/favorite', [ConversationController::class, 'favorite'])
+    ->middleware(['security_headers', 'auth', 'permission:messages.view']);
+$router->delete('/api/v1/conversations/{id}/favorite', [ConversationController::class, 'unfavorite'])
+    ->middleware(['security_headers', 'auth', 'permission:messages.view']);
 
 $router->get('/api/v1/notifications', [NotificationController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.view']);
 $router->get('/api/v1/notifications/unread-count', [NotificationController::class, 'unreadCount'])
+    ->middleware(['security_headers', 'auth', 'permission:notifications.view']);
+$router->get('/api/v1/notifications/{id}', [NotificationController::class, 'show'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.view']);
 $router->post('/api/v1/notifications/read-all', [NotificationController::class, 'markAllRead'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.manage']);
@@ -227,6 +235,8 @@ $router->get('/api/v1/notification-preferences', [NotificationController::class,
 $router->put('/api/v1/notification-preferences', [NotificationController::class, 'updatePreferences'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.manage', 'json']);
 $router->post('/api/v1/notifications/{id}/read', [NotificationController::class, 'markRead'])
+    ->middleware(['security_headers', 'auth', 'permission:notifications.manage']);
+$router->post('/api/v1/notifications/{id}/unread', [NotificationController::class, 'markUnread'])
     ->middleware(['security_headers', 'auth', 'permission:notifications.manage']);
 
 $router->get('/api/v1/reports/admin/summary', [ReportController::class, 'adminSummary'])

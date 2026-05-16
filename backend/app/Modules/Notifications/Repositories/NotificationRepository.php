@@ -40,6 +40,15 @@ class NotificationRepository
         return is_array($notification) ? $notification : null;
     }
 
+    public function findForUser(int $id, int $userId): ?array
+    {
+        $statement = $this->connection()->prepare('SELECT * FROM notifications WHERE id = :id AND user_id = :user_id LIMIT 1');
+        $statement->execute(['id' => $id, 'user_id' => $userId]);
+        $notification = $statement->fetch();
+
+        return is_array($notification) ? $notification : null;
+    }
+
     public function listForUser(int $userId, int $page = 1, int $perPage = 20): array
     {
         $page = max(1, $page);
@@ -59,14 +68,24 @@ class NotificationRepository
         ];
     }
 
-    public function markRead(int $id, int $userId): array
+    public function markRead(int $id, int $userId): ?array
     {
         $statement = $this->connection()->prepare(
             'UPDATE notifications SET read_at = COALESCE(read_at, NOW()), updated_at = NOW() WHERE id = :id AND user_id = :user_id'
         );
         $statement->execute(['id' => $id, 'user_id' => $userId]);
 
-        return $this->findById($id);
+        return $this->findForUser($id, $userId);
+    }
+
+    public function markUnread(int $id, int $userId): ?array
+    {
+        $statement = $this->connection()->prepare(
+            'UPDATE notifications SET read_at = NULL, updated_at = NOW() WHERE id = :id AND user_id = :user_id'
+        );
+        $statement->execute(['id' => $id, 'user_id' => $userId]);
+
+        return $this->findForUser($id, $userId);
     }
 
     public function markAllRead(int $userId): void
