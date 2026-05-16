@@ -22,6 +22,7 @@ use App\Modules\Recruiters\Controllers\RecruiterProfileController;
 use App\Modules\RelationshipOfficers\Controllers\RelationshipOfficerProfileController;
 use App\Modules\Reports\Controllers\ReportController;
 use App\Modules\Roles\Controllers\RoleController;
+use App\Modules\Users\Controllers\UserController;
 use App\Modules\Users\Controllers\UserRoleController;
 use App\Modules\Wallet\Controllers\WalletController;
 
@@ -52,8 +53,22 @@ $router->post('/api/v1/roles', [RoleController::class, 'store'])
     ->middleware(['security_headers', 'auth', 'permission:roles.create', 'json']);
 $router->get('/api/v1/permissions', [PermissionController::class, 'index'])
     ->middleware(['security_headers', 'auth', 'permission:permissions.view']);
+$router->get('/api/v1/users', [UserController::class, 'index'])
+    ->middleware(['security_headers', 'auth', 'permission:users.view']);
+$router->post('/api/v1/users', [UserController::class, 'store'])
+    ->middleware(['security_headers', 'auth', 'permission:users.create', 'json']);
+$router->get('/api/v1/users/{id}', [UserController::class, 'show'])
+    ->middleware(['security_headers', 'auth', 'permission:users.view']);
+$router->put('/api/v1/users/{id}', [UserController::class, 'update'])
+    ->middleware(['security_headers', 'auth', 'permission:users.update', 'json']);
 $router->post('/api/v1/users/{id}/roles', [UserRoleController::class, 'store'])
     ->middleware(['security_headers', 'auth', 'permission:roles.assign', 'json']);
+$router->post('/api/v1/users/{id}/suspend', [UserController::class, 'suspend'])
+    ->middleware(['security_headers', 'auth', 'permission:users.suspend']);
+$router->post('/api/v1/users/{id}/activate', [UserController::class, 'activate'])
+    ->middleware(['security_headers', 'auth', 'permission:users.update']);
+$router->post('/api/v1/users/{id}/deactivate', [UserController::class, 'deactivate'])
+    ->middleware(['security_headers', 'auth', 'permission:users.deactivate']);
 
 $router->get('/api/v1/recruiters/profile', [RecruiterProfileController::class, 'mine'])
     ->middleware(['security_headers', 'auth', 'permission:recruiters.update']);

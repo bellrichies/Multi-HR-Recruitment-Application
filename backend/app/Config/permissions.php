@@ -15,6 +15,7 @@ return [
         'users.create',
         'users.update',
         'users.suspend',
+        'users.deactivate',
         'roles.view',
         'roles.create',
         'roles.update',
